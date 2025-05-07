@@ -4,22 +4,30 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-
     runs-on: windows-latest
     timeout-minutes: 9999
 
-
     steps:
     - name: Download
-      run: Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
+      run: Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -OutFile ngrok.zip
+
     - name: Extract
       run: Expand-Archive ngrok.zip
+
     - name: Auth
       run: .\ngrok\ngrok.exe authtoken 2hWCOfKMGnwZgHRMnCdHoWKcobf_6a2W7Zii73ziL3ip1tnqn
+
     - name: Enable TS
-      run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server'-name "fDenyTSConnections" -Value 0
-    - run: Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-    - run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
-    - run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "@cyb3rking" -Force)
+      run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+
+    - name: Enable Firewall RDP
+      run: Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+
+    - name: Allow RDP Auth
+      run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name "UserAuthentication" -Value 1
+
+    - name: Set Password
+      run: Set-LocalUser -Name "runneradmin" -Password (ConvertTo-SecureString -AsPlainText "@cyb3rking" -Force)
+
     - name: Create Tunnel
       run: .\ngrok\ngrok.exe tcp 3389
